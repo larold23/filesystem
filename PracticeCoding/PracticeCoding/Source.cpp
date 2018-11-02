@@ -109,7 +109,7 @@ bool select(bool exit) {
 
 	int choice;
 	cout << "==Please select what number==\n\n"
-		<< "1 Open File" << endl
+		<< "1-Open File" << endl
 		<< "2-Read File" << endl
 		<< "3-Write File " << endl
 		<< "4-write to file" << endl
@@ -118,7 +118,7 @@ bool select(bool exit) {
 		<< "7-Remove file" << endl
 		<< "8-Exit program" << endl;
 	cin >> choice;
-	cout << "Choice Selected: " << endl;
+	cout << "Choice Selected: " << choice << endl;
 
 	//This case statement should be recursive except for case 8 where it leaves the select function and goes to main
 	switch (choice) {
