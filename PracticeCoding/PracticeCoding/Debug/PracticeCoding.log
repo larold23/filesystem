@@ -1,0 +1,9 @@
+﻿  Source.cpp
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(74): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(74): warning C4309: 'initializing': truncation of constant value
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(90): warning C4309: '=': truncation of constant value
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(176): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(176): warning C4309: 'initializing': truncation of constant value
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(183): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+c:\users\larry\documents\practicecoding\practicecoding\source.cpp(183): warning C4309: 'initializing': truncation of constant value
+  PracticeCoding.vcxproj -> C:\Users\Larry\Documents\PracticeCoding\Debug\PracticeCoding.exe
