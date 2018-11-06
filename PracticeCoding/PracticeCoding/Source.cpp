@@ -113,7 +113,7 @@ bool select(bool exit) {
 		<< "2-Read File" << endl
 		<< "3-Write File " << endl
 		<< "4-write to file" << endl
-		<< "5-seek where a file is" << endl
+		<< "5-Seek where a file is" << endl
 		<< "6-Display all files" << endl
 		<< "7-Remove file" << endl
 		<< "8-Exit program" << endl;
