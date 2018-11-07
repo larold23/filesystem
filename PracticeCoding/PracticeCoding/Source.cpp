@@ -103,6 +103,23 @@ void deletesector(int nSector) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
+int CSC322_fopen(const char *filename, const char *mode) {
+	CSC322FILE *fp = (filename, mode);
+
+	if (mode == wb) {
+		CSC322_fwrite(buffer, size, count, stream);
+	}
+	else if (mode == rb) {
+
+	}
+	else if (mode == w+b) {
+	}
+	else if (mode == ab) {
+	}
+	if(mode==)
+	return(CSC322FILE);
+}
+
 //User input and selection on what happens
 bool select(bool exit) {
 
