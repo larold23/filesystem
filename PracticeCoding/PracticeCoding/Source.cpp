@@ -110,11 +110,13 @@ int CSC322_fopen(const char *filename, const char *mode) {
 		CSC322_fwrite(buffer, size, count, stream);
 	}
 	else if (mode == rb) {
-
+		CSC322_fread(buffer, nBytes, CSC322FILE*stream);
 	}
 	else if (mode == w+b) {
+
 	}
 	else if (mode == ab) {
+
 	}
 	if(mode==)
 	return(CSC322FILE);
