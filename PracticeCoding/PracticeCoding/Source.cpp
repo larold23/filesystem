@@ -31,7 +31,6 @@ char* readWord(int address)
 	return buffer;
 }
 //driver to write values to file system
-
 void writeWord(int nAddress, char test[2])
 //This function is similar to read but we need to write values to the file
 {
@@ -103,23 +102,37 @@ void deletesector(int nSector) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
-int CSC322_fopen(const char *filename, const char *mode) {
-	CSC322FILE *fp = (filename, mode);
+CSC322FILE* CSC322_fopen(const char *filename, const char *mode) {
 
-	if (mode == wb) {
-		CSC322_fwrite(buffer, size, count, stream);
-	}
-	else if (mode == rb) {
-		CSC322_fread(buffer, nBytes, CSC322FILE*stream);
-	}
-	else if (mode == w+b) {
+	//This is an example of the actual stdio.h fopen. Using as reference
+	/*
+	FILE *stream;
 
-	}
-	else if (mode == ab) {
+  stream = malloc(sizeof(FILE));
+  if (!stream) {
+	errno = ENFILE;
+	return NULL;
+  }
 
+  if (open_file(stream, filename, mode) < 0) {
+	free(stream);
+	return NULL;
+  }
+
+  return stream;
+}
+	*/
+
+	CSC322FILE *stream;
+	stream = malloc(sizeof(CSC322FILE));
+	if (!stream) {
+		errno = ENFILE;
+		return NULL;
 	}
-	if(mode==)
-	return(CSC322FILE);
+	if (open_file(stream, filename, mode) < 0) {
+		free(stream);
+		return NULL;
+	}
 }
 
 //User input and selection on what happens
@@ -144,32 +157,34 @@ bool select(bool exit) {
 		//This should deal with users inputing an interger that does not fit any case statement available
 
 	case 1:
-
-		
+		const char *filename;
+		cout << "Choose what file you would like to open" << endl;
+		cout >> filename;
+		CSC322_fopen(filename, "r");
 		break;
 	case 2:
 
-		
+
 		break;
 	case 3:
 
-		
+
 		break;
 	case 4:
 
-		
+
 		break;
 	case 5:
 
-		
+
 		break;
 	case 6:
 
-		
+
 		break;
 	case 7:
 
-		
+
 		break;
 
 	case 8:
@@ -186,7 +201,7 @@ bool select(bool exit) {
 
 int main()
 {
-	
+
 	bool exit = true;
 
 	ofstream myfile;
