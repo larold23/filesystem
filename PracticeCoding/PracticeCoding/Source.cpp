@@ -80,27 +80,36 @@ void deletesector(int nSector, fstream& myfile) {
 //Function is used to open the file system and point to it in RAM
 
 CSC322FILE* CSC322_fopen(const char *filename, const char *mode) {
-	//Checks to see if the file exists
-	if ((stream = fopen(filename, "rb")) == NULL) {
-		cout << filename << " is not found" << endl;
-	}
 
-	//If statement for when user chooses to write
-	if (mode == wb) {
-		fopen()
-	}
+	//This is an example of the actual stdio.h fopen. Using as reference
+	/*
+	FILE *stream;
 
-	//If statement for when user chooses read
-	else if (mode == rb) {
-	}
+  stream = malloc(sizeof(FILE));
+  if (!stream) {
+	errno = ENFILE;
+	return NULL;
+  }
 
-	else if (mode == w+b) {
-	}
+  if (open_file(stream, filename, mode) < 0) {
+	free(stream);
+	return NULL;
+  }
 
-	else if (mode == ab) {
-	}
+  return stream;
+}
+	*/
 
-	return(CSC322FILE);
+	CSC322FILE *stream;
+	stream = malloc(sizeof(CSC322FILE));
+	if (!stream) {
+		errno = ENFILE;
+		return NULL;
+	}
+	if (open_file(stream, filename, mode) < 0) {
+		free(stream);
+		return NULL;
+	}
 }
 
 //User input and selection on what happens
@@ -127,7 +136,9 @@ bool select(bool exit, fstream& myfile) {
 
 	case 1:
 		const char *filename;
-		CSC322_fopen(filename,"r");
+		cout << "Choose what file you would like to open" << endl;
+		cout >> filename;
+		CSC322_fopen(filename, "r");
 		break;
 	case 2:
 		// when user chooses to read a file
@@ -138,25 +149,25 @@ bool select(bool exit, fstream& myfile) {
 	case 3:
 		// when user chooses to write a file
 
-		
+
 		break;
 	case 4:
 		// when user chooses to edit a file
 
 
-		
+
 		break;
 	case 5:
 		// when user chooses to find a file
 
 
-		
+
 		break;
 	case 6:
 		// when user chooses to display all files
 
 
-		
+
 		break;
 	case 7:
 		// when user chooses to delete a file
@@ -183,7 +194,10 @@ bool select(bool exit, fstream& myfile) {
 	return true;
 }
 
+int main()
+{
 
+	bool exit = true;
 
 
 int main()
