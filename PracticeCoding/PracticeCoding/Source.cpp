@@ -31,7 +31,6 @@ char* readWord(int address)
 	return buffer;
 }
 //driver to write values to file system
-
 void writeWord(int nAddress, char test[2])
 //This function is similar to read but we need to write values to the file
 {
@@ -103,20 +102,27 @@ void deletesector(int nSector) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
-int CSC322_fopen(const char *filename, const char *mode) {
-	CSC322FILE *fp = (filename, mode);
+CSC322FILE* CSC322_fopen(const char *filename, const char *mode) {
+	//Checks to see if the file exists
+	if ((stream = fopen(filename, "rb")) == NULL) {
+		cout << filename << " is not found" << endl;
+	}
 
+	//If statement for when user chooses to write
 	if (mode == wb) {
-		CSC322_fwrite(buffer, size, count, stream);
+		fopen()
 	}
-	else if (mode == rb) {
 
+	//If statement for when user chooses read
+	else if (mode == rb) {
 	}
+
 	else if (mode == w+b) {
 	}
+
 	else if (mode == ab) {
 	}
-	if(mode==)
+
 	return(CSC322FILE);
 }
 
@@ -142,8 +148,8 @@ bool select(bool exit) {
 		//This should deal with users inputing an interger that does not fit any case statement available
 
 	case 1:
-
-		
+		const char *filename;
+		CSC322_fopen(filename,"r");
 		break;
 	case 2:
 
