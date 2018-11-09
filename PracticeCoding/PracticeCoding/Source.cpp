@@ -8,6 +8,15 @@
 
 using namespace std;
 
+struct openfile{
+
+	bool newfile;
+	bool edited;
+	string filename;
+	vector<char> filedata;
+	int returnaddress;
+	string mode;
+};
 
 
 //This is the function to call if you want to read a file
@@ -84,7 +93,8 @@ bool select(bool exit, fstream& myfile) {
 		<< "5-seek where a file is" << endl
 		<< "6-Display all files" << endl
 		<< "7-Remove file" << endl
-		<< "8-Exit program" << endl;
+		<< "8-Exit program" << endl
+		<< "9-newfilesystem-used for testing"<< endl;
 	cin >> choice;
 	cout << "Choice Selected: " << choice << endl;
 
@@ -93,9 +103,6 @@ bool select(bool exit, fstream& myfile) {
 		//This should deal with users inputing an interger that does not fit any case statement available
 
 	case 1:
-		
-
-		
 		
 		break;
 	case 2:
@@ -128,6 +135,13 @@ bool select(bool exit, fstream& myfile) {
 		return exit;
 		break;
 
+	case 9:
+		char buffer[] = { 0xFF, 0xFF };
+		for (int i = 0; i < 640000; i++)
+		{
+			myfile.write(buffer, 2);
+		}
+
 	default:
 		cout << "Invalid selection, please make sure you are inputting a value between 1 and 8" << "/n";
 		break;
@@ -135,27 +149,16 @@ bool select(bool exit, fstream& myfile) {
 	return true;
 }
 
+
+
+
 int main()
 {
-	
-	bool exit = true;
 
+	vector<openfile> ramStorage;
+	bool exit = true;
 	fstream myfile;
 	myfile.open("filesystem.bin", ios::binary | ios::out);
-
-	char buffer[] = { 0xFF, 0xFF };
-	for (int i = 0; i < 640000; i++)
-	{
-		myfile.write(buffer, 2);
-	}
-	
-
-	char word[2] = { 0x0F,0xF0 };
-	char word2[2] = { 0x00,0x00 };
-	for (int i = 0; i < 15; i = i + 2) {
-		writeWord(i, word, myfile);
-	}
-	deletesector(0, myfile);
 
 	while (exit)
 	{
