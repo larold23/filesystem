@@ -29,7 +29,6 @@ char* readWord(int address, fstream& myfile)
 	return buffer;
 }
 //driver to write values to file system
-
 void writeWord(int nAddress, char test[2], fstream& myfile)
 //This function is similar to read but we need to write values to the file
 {
