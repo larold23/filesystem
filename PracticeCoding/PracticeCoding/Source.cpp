@@ -103,34 +103,47 @@ bool select(bool exit, fstream& myfile) {
 		//This should deal with users inputing an interger that does not fit any case statement available
 
 	case 1:
+		// when user chooses to open a file
+
+		
 		
 		break;
 	case 2:
-
+		// when user chooses to read a file
 		
+
+
 		break;
 	case 3:
+		// when user chooses to write a file
 
 		
 		break;
 	case 4:
+		// when user chooses to edit a file
+
 
 		
 		break;
 	case 5:
+		// when user chooses to find a file
+
 
 		
 		break;
 	case 6:
+		// when user chooses to display all files
+
 
 		
 		break;
 	case 7:
-
+		// when user chooses to delete a file
 		
 		break;
 
 	case 8:
+		// when user chooses to exit
 		exit = false;
 		return exit;
 		break;
