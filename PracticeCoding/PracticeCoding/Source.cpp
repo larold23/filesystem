@@ -79,36 +79,51 @@ void deletesector(int nSector, fstream& myfile) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
-CSC322FILE* CSC322_fopen(const char *filename, const char *mode) {
-
-	//This is an example of the actual stdio.h fopen. Using as reference
-	/*
-	FILE *stream;
-
-  stream = malloc(sizeof(FILE));
-  if (!stream) {
-	errno = ENFILE;
-	return NULL;
-  }
-
-  if (open_file(stream, filename, mode) < 0) {
-	free(stream);
-	return NULL;
-  }
-
-  return stream;
-}
-	*/
-
-	CSC322FILE *stream;
-	stream = malloc(sizeof(CSC322FILE));
-	if (!stream) {
-		errno = ENFILE;
-		return NULL;
+int CSC322_fopen(const char *filename, const char *mode, fstream& myfile) 
+{
+	int filefound = 0;
+	for (int i = 0; i < ramStorage.size(); i++) 
+	{
+		if (ramStorage[i].ramStorage.filename == filename) 
+		{
+			cout << "file already found!";
+			filefound = 1;
+			break;
+		}
 	}
-	if (open_file(stream, filename, mode) < 0) {
-		free(stream);
-		return NULL;
+	if (filefound == 0) 
+	{
+		//temp values to access the headers for information
+		int address;
+		char* next = new char[2];
+		//accesses the headers for both file names and next address 
+		while (filefound == 0) 
+		{
+			//buffer will only look for the size of filename
+			char* buffer = new char[sizeof(filename)];
+			//increments by 1 word to start reading at filename
+			address = address + 4;
+			//fills out the buffer with filename
+			for (int j = 0; j < sizeof(filename); j = j + 2)
+			{
+				//acceses that filename for that location
+				buffer = readWord(address, myfile);
+			}
+			
+			if (buffer == filename) 
+			{
+				filefound = 1;
+			}
+			//moves to the next file location
+			else 
+			{
+				address = address + 30;
+				next = readWord(address, myfile);
+				//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
+				//and setting it equal to address
+				address = stoi(next,nullptr,2);
+			}
+		}
 	}
 }
 
@@ -135,10 +150,7 @@ bool select(bool exit, fstream& myfile) {
 		//This should deal with users inputing an interger that does not fit any case statement available
 
 	case 1:
-		const char *filename;
-		cout << "Choose what file you would like to open" << endl;
-		cout >> filename;
-		CSC322_fopen(filename, "r");
+
 		break;
 	case 2:
 		// when user chooses to read a file
@@ -193,11 +205,6 @@ bool select(bool exit, fstream& myfile) {
 	}
 	return true;
 }
-
-int main()
-{
-
-	bool exit = true;
 
 
 int main()
