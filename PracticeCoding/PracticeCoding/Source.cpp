@@ -94,34 +94,64 @@ int CSC322_fopen(const char *filename, const char *mode, fstream& myfile)
 	if (filefound == 0) 
 	{
 		//temp values to access the headers for information
-		int address;
+		int address,header,length;
 		char* next = new char[2];
+		char* buffer = new char[2];
+		char* name = new char[sizeof(filename)];
 		//accesses the headers for both file names and next address 
-		while (filefound == 0) 
+		while (filefound == 0)
 		{
 			//buffer will only look for the size of filename
-			char* buffer = new char[sizeof(filename)];
-			//increments by 1 word to start reading at filename
-			address = address + 4;
-			//fills out the buffer with filename
-			for (int j = 0; j < sizeof(filename); j = j + 2)
+			buffer = readWord(address, myfile);
+			header = stoi(buffer,nullptr,16);
+
+			//Checks the flag to see if the file is used or not
+			if (header == 0000)
 			{
-				//acceses that filename for that location
-				buffer = readWord(address, myfile);
-			}
-			
-			if (buffer == filename) 
-			{
-				filefound = 1;
-			}
-			//moves to the next file location
-			else 
-			{
-				address = address + 30;
+				address = address + 66;
 				next = readWord(address, myfile);
 				//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
 				//and setting it equal to address
-				address = stoi(next,nullptr,2);
+				address = stoi(next, nullptr, 2);
+			}
+
+			//flag shows file exists
+			else if(header==65280)
+			{
+				//increments by 1 word to start reading at filename
+				address = address + 4;
+				//fills out the buffer with filename
+				for (int j = 0; j < sizeof(filename); j = j + 2)
+				{
+				//acceses that filename for that location
+					buffer = readWord(address, myfile);
+					name[j] = buffer[0];
+					name[j + 1] = buffer[1];
+				}
+
+				if (name == filename)
+				{
+					filefound = 1;
+					address = address + 58;
+					buffer = readWord(address, myfile);
+					length = atoi(buffer);
+					address = address + 8;
+					openfile file;
+					for (int k = 0; k < length; k = k + 2) {
+						buffer = readWord(address, myfile);
+						file.filedata = buffer[0];
+
+					}
+				}
+				//moves to the next file location
+				else
+				{
+					address = address + 33;
+					next = readWord(address, myfile);
+					//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
+					//and setting it equal to address
+					address = stoi(next, nullptr, 2);
+				}
 			}
 		}
 	}
