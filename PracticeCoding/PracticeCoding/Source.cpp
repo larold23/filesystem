@@ -8,6 +8,9 @@
 
 using namespace std;
 
+//These variables are what gets imported 
+//ramStorage is the vector we put the struct in
+//ex: ramStorage[1]={newfile,edited,filename,filedata,returnaddress,mode}
 struct openfile{
 
 	bool newfile;
@@ -17,7 +20,8 @@ struct openfile{
 	int returnaddress;
 	string mode;
 };
-
+//set up the vector as global for easier access 
+vector<openfile> ramStorage;
 
 //This is the function to call if you want to read a file
 char* readWord(int address, fstream& myfile)
@@ -65,6 +69,9 @@ void deletesector(int nSector, fstream& myfile) {
 	if ((nSector > 20) || (nSector < 0)) {
 		cout << "Invalid Sector" << "/n";
 	}
+	else if(nSector==20){
+		deleteallsectors(myfile);
+	}
 	else {
 		char erase[63999];
 		for (int i = 0; i < 63999; i++) {
@@ -79,37 +86,42 @@ void deletesector(int nSector, fstream& myfile) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
-int CSC322_fopen(const char *filename, const char *mode, fstream& myfile) 
+void CSC322_fopen(const char *filename, int mode, fstream& myfile) 
 {
+
 	int filefound = 0;
+
+	//checking for if file is already in ram
 	for (int i = 0; i < ramStorage.size(); i++) 
 	{
-		if (ramStorage[i].ramStorage.filename == filename) 
+		if (ramStorage[i].filename == filename) 
 		{
 			cout << "file already found!";
 			filefound = 1;
 			break;
 		}
 	}
+
 	if (filefound == 0) 
 	{
 		//temp values to access the headers for information
-		int address,header,length;
-		char* next = new char[2];
-		char* buffer = new char[2];
+		int addresstemp,address,header,length,ramSize,index;
+		char* next = new char[1];
+		//temp char that i use for loops to transfer to other char
+		char* buffer = new char[1];
 		char* name = new char[sizeof(filename)];
 		//accesses the headers for both file names and next address 
 		while (filefound == 0)
 		{
 			//buffer will only look for the size of filename
-			buffer = readWord(address, myfile);
+			buffer = readWord(addresstemp, myfile);
 			header = stoi(buffer,nullptr,16);
 
 			//Checks the flag to see if the file is used or not
 			if (header == 0000)
 			{
-				address = address + 66;
-				next = readWord(address, myfile);
+				addresstemp = addresstemp + 66;
+				next = readWord(addresstemp, myfile);
 				//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
 				//and setting it equal to address
 				address = stoi(next, nullptr, 2);
@@ -118,45 +130,62 @@ int CSC322_fopen(const char *filename, const char *mode, fstream& myfile)
 			//flag shows file exists
 			else if(header==65280)
 			{
+				address = addresstemp;
 				//increments by 1 word to start reading at filename
-				address = address + 4;
+				addresstemp = addresstemp + 4;
+
 				//fills out the buffer with filename
 				for (int j = 0; j < sizeof(filename); j = j + 2)
 				{
 				//acceses that filename for that location
-					buffer = readWord(address, myfile);
+					buffer = readWord(addresstemp, myfile);
 					name[j] = buffer[0];
 					name[j + 1] = buffer[1];
 				}
-
+				//Found location, importing into main memmory
 				if (name == filename)
 				{
 					filefound = 1;
-					address = address + 58;
-					buffer = readWord(address, myfile);
-					length = atoi(buffer);
-					address = address + 8;
-					openfile file;
-					for (int k = 0; k < length; k = k + 2) {
-						buffer = readWord(address, myfile);
-						file.filedata = buffer[0];
+					//declaring a new file imorted to ramStorage
+					ramSize = ramStorage.size();
+					ramStorage.resize(ramSize + 1);
+					index = ramStorage.size() - 1;
+				    //importing new file
+					ramStorage[index].newfile = true;
+					//importing edited
+					ramStorage[index].edited = false;
+					//importing filename
+					ramStorage[index].filename = string (name);
 
+					//importing filedata
+					addresstemp = addresstemp + 58;
+					buffer = readWord(addresstemp, myfile);
+					length = stoi(buffer, nullptr, 16);
+					addresstemp = addresstemp + 8;
+					for (int k = 0; k < length; k = k + 2) {
+						buffer = readWord(addresstemp, myfile);
+						ramStorage[index].filedata.push_back(buffer[0]);
+						ramStorage[index].filedata.push_back(buffer[1]);
 					}
+					//import return address
+					ramStorage[index].returnaddress = address;
+					//importing mode
+					ramStorage[index].mode = mode;
+					//determing based on mode what to do with the recently opened file
 				}
 				//moves to the next file location
 				else
 				{
-					address = address + 33;
-					next = readWord(address, myfile);
-					//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
+					addresstemp = addresstemp + 33;
+					next = readWord(addresstemp, myfile);
+					//stoi converts a string to an interger. Basically its taking the array of seperate numbers 
 					//and setting it equal to address
-					address = stoi(next, nullptr, 2);
+					addresstemp = stoi(next, nullptr, 16);
 				}
 			}
 		}
 	}
 }
-
 //User input and selection on what happens
 bool select(bool exit, fstream& myfile) {
 
