@@ -106,9 +106,9 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 	{
 		//temp values to access the headers for information
 		int addresstemp,address,header,length,ramSize,index;
-		char* next = new char[1];
+		char* next = new char[2];
 		//temp char that i use for loops to transfer to other char
-		char* buffer = new char[1];
+		char* buffer = new char[2];
 		char* name = new char[sizeof(filename)];
 		//accesses the headers for both file names and next address 
 		while (filefound == 0)
@@ -135,7 +135,7 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 				addresstemp = addresstemp + 4;
 
 				//fills out the buffer with filename
-				for (int j = 0; j < sizeof(filename); j = j + 2)
+				for (int j = 0; j < sizeof(filename); j = j + 1)
 				{
 				//acceses that filename for that location
 					buffer = readWord(addresstemp, myfile);
