@@ -20,8 +20,6 @@ struct openfile{
 	int returnaddress;
 	string mode;
 };
-//set up the vector as global for easier access 
-vector<openfile> ramStorage;
 
 //This is the function to call if you want to read a file
 char* readWord(int address, fstream& myfile)
@@ -86,9 +84,8 @@ void deletesector(int nSector, fstream& myfile) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
-void CSC322_fopen(const char *filename, int mode, fstream& myfile) 
+void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfile>& ramStorage) 
 {
-
 	int filefound = 0;
 
 	//checking for if file is already in ram
@@ -102,7 +99,8 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 
 	if (filefound == 0) {
 		//temp values to access the headers for information
-		int addresstemp,address,header,length,ramSize,index;
+		int address,header,length,ramSize,index;
+		int addresstemp = 0;
 		char* next = new char[2];
 		//temp char that i use for loops to transfer to other char
 		char* buffer = new char[2];
@@ -120,6 +118,20 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 				//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
 				//and setting it equal to address
 				address = stoi(next, nullptr, 2);
+				if (stoi(next, nullptr, 2) == 65535) {
+					int choice;
+					cout << "File does not exist, would you like to create it? \n"<<"1.yes  2.no";
+					cin >> choice;
+					if (choice = 1) {
+						ramSize = ramStorage.size();
+						ramStorage.resize(ramSize + 1);
+						index = ramStorage.size() - 1;
+						ramStorage[index].newfile = true;
+						ramStorage[index].edited = false;
+						ramStorage[index].filename = filename;
+						ramStorage[index].mode = mode;
+					}
+				}
 			}
 
 			//flag shows file exists
@@ -143,7 +155,7 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 					ramStorage.resize(ramSize + 1);
 					index = ramStorage.size() - 1;
 				    //importing new file
-					ramStorage[index].newfile = true;
+					ramStorage[index].newfile = false;
 					//importing edited
 					ramStorage[index].edited = false;
 					//importing filename
@@ -157,8 +169,7 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 
 					for (int k = 0; k < length; k = k + 2) {
 						buffer = readWord(addresstemp, myfile);
-						ramStorage[index].filedata.push_back(buffer[0]);
-						ramStorage[index].filedata.push_back(buffer[1]);
+						ramStorage[index].filedata.push_back(buffer);
 					}
 
 					//import return address
@@ -167,13 +178,28 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile)
 					ramStorage[index].mode = mode;
 					//determing based on mode what to do with the recently opened file
 				}
-
 				//moves to the next file location
 				else{
 					addresstemp = addresstemp + 33;
 					next = readWord(addresstemp, myfile);
-					
-					addresstemp =stoi(next, nullptr, 16));
+					addresstemp = stoi(next, nullptr, 16);
+					if (addresstemp == 65535) {
+						int choice;
+						cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
+						cin >> choice;
+						if (choice = 1) {
+							ramSize = ramStorage.size();
+							ramStorage.resize(ramSize + 1);
+							index = ramStorage.size() - 1;
+							ramStorage[index].newfile = true;
+							ramStorage[index].edited = false;
+							ramStorage[index].filename = filename;
+							ramStorage[index].mode = mode;
+
+						}
+
+
+					}
 				}
 			}
 		}
@@ -246,11 +272,11 @@ bool select(bool exit, fstream& myfile) {
 		break;
 
 	case 9:
-		char buffer[] = { 0xFF, 0xFF };
-		for (int i = 0; i < 640000; i++)
-		{
-			myfile.write(buffer, 2);
-		}
+		//char buffer[] = { 0xFF, 0xFF };
+		//for (int i = 0; i < 640000; i++)
+		//{
+	//		myfile.write(buffer, 2);
+	//	}
 
 	default:
 		cout << "Invalid selection, please make sure you are inputting a value between 1 and 8" << "/n";
@@ -262,7 +288,7 @@ bool select(bool exit, fstream& myfile) {
 
 int main()
 {
-
+	//set up the vector as global for easier access 
 	vector<openfile> ramStorage;
 	bool exit = true;
 	fstream myfile;
