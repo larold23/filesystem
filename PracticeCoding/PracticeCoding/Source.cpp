@@ -120,16 +120,18 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 				address = stoi(next, nullptr, 2);
 				if (stoi(next, nullptr, 2) == 65535) {
 					int choice;
-					cout << "File does not exist, would you like to create it? \n"<<"1.yes  2.no";
+					cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
 					cin >> choice;
-					if (choice = 1) {
-						ramSize = ramStorage.size();
-						ramStorage.resize(ramSize + 1);
-						index = ramStorage.size() - 1;
-						ramStorage[index].newfile = true;
-						ramStorage[index].edited = false;
-						ramStorage[index].filename = filename;
-						ramStorage[index].mode = mode;
+					if (header == 655353) {
+						if (choice = 1) {
+							ramSize = ramStorage.size();
+							ramStorage.resize(ramSize + 1);
+							index = ramStorage.size() - 1;
+							ramStorage[index].newfile = true;
+							ramStorage[index].edited = false;
+							ramStorage[index].filename = filename;
+							ramStorage[index].mode = mode;
+						}
 					}
 				}
 			}
@@ -188,6 +190,9 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 						cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
 						cin >> choice;
 						if (choice = 1) {
+
+							//For this portions we need to make sure we make the address after this header file location because 
+							//a file exists at this header, but a file doesnt exist afterwards.
 							ramSize = ramStorage.size();
 							ramStorage.resize(ramSize + 1);
 							index = ramStorage.size() - 1;
