@@ -22,30 +22,29 @@ struct openfile{
 };
 
 //This is the function to call if you want to read a file
-char* readWord(int address, fstream& myfile)
+char readWord(int address, fstream& myfile)
 {
 	//creates the object using the fstream function
 	myfile.seekg(address);
-	char* buffer = new char[2];
+	char buffer[2];
 	myfile.read(buffer, 2);
-	return buffer;
+	return buffer[0];
+	return buffer[1];
 }
 //driver to write values to file system
 void writeWord(int nAddress, char test[2], fstream& myfile)
 //This function is similar to read but we need to write values to the file
 {
+	char newword[2];
 	//Checks whether the file is actually there
-	if ((nAddress % 2) == 0)
-	{
+	if ((nAddress % 2) == 0){
 		char* oldword = readWord(nAddress, myfile);
-		char* newword = new char[2];
 		newword[0] = (oldword[0] & test[0]);
 		newword[1] = (oldword[1] & test[1]);
 		myfile.seekp(nAddress);
 		myfile.write(newword, 2);
 	}
-	else
-	{
+	else{
 		cout << "Writing failed not in word position";
 		system("pause");
 	}
@@ -96,33 +95,40 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 			break;
 		}
 	}
-
+	int addresstemp = 0;
 	if (filefound == 0) {
 		//temp values to access the headers for information
-		int address,header,length,ramSize,index;
+		int address,length,ramSize,index;
 		int addresstemp = 0;
 		char* next = new char[2];
 		//temp char that i use for loops to transfer to other char
-		char* buffer = new char[2];
+		char* buffer=new char[2];
+		char* header=new char[2];
+
+		char used[2] = {0xFF,0x00};
+		char empty[2] = {0xFF,0xFF};
+		char deleted[2] = {0x00,0x00};
 		char* name = new char[sizeof(filename)];
 		//accesses the headers for both file names and next address 
 		while (filefound == 0){
-			//buffer will only look for the size of filename
-			buffer = readWord(addresstemp, myfile);
-			header = stoi(buffer,nullptr,16);
 
+			//locates the header value
+			buffer = readWord(addresstemp, myfile);
+			header = buffer;
+			cout << header << endl;
 			//Checks the flag to see if the file is used or not
-			if (header == 0 || 65535){
+			if (header == deleted | header== empty) {
+				cout << "header displayed no file";
 				addresstemp = addresstemp + 66;
 				next = readWord(addresstemp, myfile);
 				//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
 				//and setting it equal to address
 				address = stoi(next, nullptr, 2);
-				if (stoi(next, nullptr, 2) == 65535) {
+				if (next == empty) {
 					int choice;
 					cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
 					cin >> choice;
-					if (header == 655353) {
+					if (header == empty) {
 						if (choice = 1) {
 							ramSize = ramStorage.size();
 							ramStorage.resize(ramSize + 1);
@@ -135,9 +141,9 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 					}
 				}
 			}
-
 			//flag shows file exists
-			else if(header==65280){
+			else if (header == used) {
+				system("pause");
 				address = addresstemp;
 				//increments by 1 word to start reading at filename
 				addresstemp = addresstemp + 4;
@@ -211,7 +217,7 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 	}
 }
 //User input and selection on what happens
-bool select(bool exit, fstream& myfile) {
+bool select(bool exit, fstream& myfile, vector<openfile>& ramStorage) {
 
 
 	int choice;
@@ -233,59 +239,43 @@ bool select(bool exit, fstream& myfile) {
 		//This should deal with users inputing an interger that does not fit any case statement available
 
 	case 1:
-
-
+		deleteallsectors(myfile );
+		char* filename = readWord(0, myfile);
+		writeWord(0, filename, myfile);
+		CSC322_fopen(filename, 1, myfile,ramStorage);
 		break;
-	case 2:
+	//case 2:
 		// when user chooses to read a file
-		
-
-
-		break;
-	case 3:
-		// when user chooses to write a file
-
-
-		break;
-	case 4:
-		// when user chooses to edit a file
-
-
-
-		break;
-	case 5:
+	//	break;
+	//case 3:
+		// when user chooses to write a fil
+		//break;
+	//case 4:
+		// when user chooses to edit a fill
+	//	break;
+	//case 5:
 		// when user chooses to find a file
-
-
-
-		break;
-	case 6:
+	//	break;
+	//case 6:
 		// when user chooses to display all files
-
-
-
-		break;
-	case 7:
+	//	break;
+	//case 7:
 		// when user chooses to delete a file
-		
-		break;
-
-	case 8:
+	//	break;
+	//case 8:
 		// when user chooses to exit
-		exit = false;
-		return exit;
-		break;
-
-	case 9:
+	//	exit = false;
+	//	return exit;
+	//	break;
+	//case 9:
 		//char buffer[] = { 0xFF, 0xFF };
 		//for (int i = 0; i < 640000; i++)
 		//{
 	//		myfile.write(buffer, 2);
 	//	}
-
-	default:
-		cout << "Invalid selection, please make sure you are inputting a value between 1 and 8" << "/n";
-		break;
+//	default:
+	//	cout << "Invalid selection, please make sure you are inputting a value between 1 and 8" << "/n";
+	//	break;
 	}
 	return true;
 }
@@ -297,11 +287,11 @@ int main()
 	vector<openfile> ramStorage;
 	bool exit = true;
 	fstream myfile;
-	myfile.open("filesystem.bin", ios::binary | ios::out);
+	myfile.open("filesystem.bin", ios::binary | ios::out | ios::in);
 
 	while (exit)
 	{
-		exit = select(exit, myfile);
+		exit = select(exit, myfile,ramStorage);
 	}
 
 	myfile.close();
