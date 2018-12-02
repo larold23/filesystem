@@ -22,37 +22,41 @@ struct openfile{
 };
 
 //This is the function to call if you want to read a file
-char readWord(int address, fstream& myfile)
+char* readWord(int address, fstream& myfile)
 {
 	//creates the object using the fstream function
 	myfile.seekg(address);
-	char buffer[2];
+	char* buffer = new char[2];
 	myfile.read(buffer, 2);
-	return buffer[0];
-	return buffer[1];
+	return buffer;
+	delete buffer;
 }
 //driver to write values to file system
-void writeWord(int nAddress, char test[2], fstream& myfile)
+void writeWord(int nAddress, char* test, fstream& myfile){
 //This function is similar to read but we need to write values to the file
-{
-	char newword[2];
+	char* newword= new char[2];
+	char* oldword = new char[2];
 	//Checks whether the file is actually there
-	if ((nAddress % 2) == 0){
-		char* oldword = readWord(nAddress, myfile);
-		newword[0] = (oldword[0] & test[0]);
-		newword[1] = (oldword[1] & test[1]);
-		myfile.seekp(nAddress);
-		myfile.write(newword, 2);
+	if ((nAddress % 2) == 0) {
+		oldword = readWord(nAddress, myfile);
+		short oldvar = *oldword;
+		short newvar = *test;
+		newword = test;
+		if ((oldvar & newvar) != newvar) {
+			myfile.seekp(nAddress);
+			myfile.write(newword, 2);
+		}
 	}
 	else{
 		cout << "Writing failed not in word position";
 		system("pause");
 	}
-
+	//delete newword;
+	//delete oldword;
 }
+
 //The next two functions just reuse the write word function to erase the sectors
-void deleteallsectors(fstream& myfile)
-{
+void deleteallsectors(fstream& myfile){
 	
 	char buffer[] = { 0xFF, 0xFF };
 	for (int i = 0; i < 640000; i++)
@@ -83,7 +87,7 @@ void deletesector(int nSector, fstream& myfile) {
 //These functions are meant to use the drivers from part 1
 //Function is used to open the file system and point to it in RAM
 
-void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfile>& ramStorage) 
+void CSC322_fopen(const char *filename, const char *mode, fstream& myfile, vector<openfile>& ramStorage) 
 {
 	int filefound = 0;
 
@@ -95,35 +99,39 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 			break;
 		}
 	}
+
 	int addresstemp = 0;
 	if (filefound == 0) {
+
 		//temp values to access the headers for information
 		int address,length,ramSize,index;
 		int addresstemp = 0;
-		char* next = new char[2];
+		char* next=new char[2];
 		//temp char that i use for loops to transfer to other char
 		char* buffer=new char[2];
 		char* header=new char[2];
-
 		char used[2] = {0xFF,0x00};
-		char empty[2] = {0xFF,0xFF};
+		char* used2 = used;
+		char empty[2]={0xFF,0xFF};
+		used2 = empty;
 		char deleted[2] = {0x00,0x00};
-		char* name = new char[sizeof(filename)];
+		char* name=new char[sizeof(filename)];
+
 		//accesses the headers for both file names and next address 
 		while (filefound == 0){
 
 			//locates the header value
 			buffer = readWord(addresstemp, myfile);
 			header = buffer;
-			cout << header << endl;
+			delete buffer;
+
 			//Checks the flag to see if the file is used or not
-			if (header == deleted | header== empty) {
+			if (strcmp(header,deleted) == 0 || strcmp(header,empty)== 0) {
 				cout << "header displayed no file";
 				addresstemp = addresstemp + 66;
 				next = readWord(addresstemp, myfile);
-				//atoi converts a string to an interger. Basically its taking the array of seperate numbers 
-				//and setting it equal to address
-				address = stoi(next, nullptr, 2);
+
+				address = stoi(next, nullptr, 16);
 				if (next == empty) {
 					int choice;
 					cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
@@ -142,7 +150,7 @@ void CSC322_fopen(const char *filename, int mode, fstream& myfile, vector<openfi
 				}
 			}
 			//flag shows file exists
-			else if (header == used) {
+			else if (strcmp(header,used) == 0) {
 				system("pause");
 				address = addresstemp;
 				//increments by 1 word to start reading at filename
@@ -240,9 +248,16 @@ bool select(bool exit, fstream& myfile, vector<openfile>& ramStorage) {
 
 	case 1:
 		deleteallsectors(myfile );
-		char* filename = readWord(0, myfile);
-		writeWord(0, filename, myfile);
-		CSC322_fopen(filename, 1, myfile,ramStorage);
+		char test2[2] = { 0xFF,0x00 };
+		char* test=test2;
+		writeWord(0, test, myfile);
+		char* filename = new char[2];
+		filename = readWord(0, myfile);
+		filename = readWord(1, myfile);
+		char* mode = new char[1];
+		mode;
+		
+		CSC322_fopen(filename, mode, myfile,ramStorage);
 		break;
 	//case 2:
 		// when user chooses to read a file
