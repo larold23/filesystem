@@ -3,8 +3,10 @@
 #include <iostream>
 #include <fstream>
 #include <String>
+#include <sstream>
 #include <vector>
 #include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -26,33 +28,31 @@ char* readWord(int address, fstream& myfile)
 {
 	//creates the object using the fstream function
 	myfile.seekg(address);
-	char* buffer = new char[2];
+	char* buffer=new char[3];
 	myfile.read(buffer, 2);
 	return buffer;
 	delete buffer;
 }
 //driver to write values to file system
-void writeWord(int nAddress, char* test, fstream& myfile){
+void writeWord(int nAddress, char test[2], fstream& myfile)
 //This function is similar to read but we need to write values to the file
-	char* newword= new char[2];
-	char* oldword = new char[2];
+{
 	//Checks whether the file is actually there
-	if ((nAddress % 2) == 0) {
-		oldword = readWord(nAddress, myfile);
-		short oldvar = *oldword;
-		short newvar = *test;
-		newword = test;
-		if ((oldvar & newvar) != newvar) {
-			myfile.seekp(nAddress);
-			myfile.write(newword, 2);
-		}
+	if ((nAddress % 2) == 0)
+	{
+		char* oldword = readWord(nAddress, myfile);
+		char* newword = new char[3];
+		newword[0] = (oldword[0] & test[0]);
+		newword[1] = (oldword[1] & test[1]);
+		myfile.seekp(nAddress);
+		myfile.write(newword, 2);
 	}
-	else{
+	else
+	{
 		cout << "Writing failed not in word position";
 		system("pause");
 	}
-	//delete newword;
-	//delete oldword;
+
 }
 
 //The next two functions just reuse the write word function to erase the sectors
@@ -105,16 +105,16 @@ void CSC322_fopen(const char *filename, const char *mode, fstream& myfile, vecto
 
 		//temp values to access the headers for information
 		int address,length,ramSize,index;
-		int addresstemp = 0;
-		char* next=new char[2];
-		//temp char that i use for loops to transfer to other char
-		char* buffer=new char[2];
-		char* header=new char[2];
-		char used[2] = {0xFF,0x00};
+		char* next=new char[3];
+		unsigned char* math = new unsigned char[3];
+		char* buffer=new char[3];
+		char* header=new char[3];
+		char used[3] = {0xFF,0x00};
 		char* used2 = used;
-		char empty[2]={0xFF,0xFF};
-		used2 = empty;
-		char deleted[2] = {0x00,0x00};
+		char empty[3]={0xFF,0xFF};
+		char deleted[3] = {0x00,0x00};
+		char* empty2 = empty;
+		char* deleted2 = deleted;
 		char* name=new char[sizeof(filename)];
 
 		//accesses the headers for both file names and next address 
@@ -123,15 +123,23 @@ void CSC322_fopen(const char *filename, const char *mode, fstream& myfile, vecto
 			//locates the header value
 			buffer = readWord(addresstemp, myfile);
 			header = buffer;
+			cout <<endl<< header[0] << header[1];
+			string teste(empty2),testh(header),testd(deleted2),testu(used2),testm(mode);
 			delete buffer;
-
 			//Checks the flag to see if the file is used or not
-			if (strcmp(header,deleted) == 0 || strcmp(header,empty)== 0) {
+			if (testh == testd || testh == teste) {
 				cout << "header displayed no file";
 				addresstemp = addresstemp + 66;
 				next = readWord(addresstemp, myfile);
-
-				address = stoi(next, nullptr, 16);
+				stringstream ss;
+				math = (unsigned char*)next;
+				for (int i = 0; i < 2; ++i) {
+					ss << hex << (int)math[i];
+				}
+				string mystr = ss.str();
+				addresstemp = unsigned int(stoul(mystr, 0, 16));
+				delete(next);
+				delete(math);
 				if (next == empty) {
 					int choice;
 					cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
@@ -150,18 +158,18 @@ void CSC322_fopen(const char *filename, const char *mode, fstream& myfile, vecto
 				}
 			}
 			//flag shows file exists
-			else if (strcmp(header,used) == 0) {
-				system("pause");
+			else if ((testh == testu)) {
 				address = addresstemp;
 				//increments by 1 word to start reading at filename
 				addresstemp = addresstemp + 4;
 
 				//fills out the buffer with filename
-				for (int j = 0; j < sizeof(filename); j = j + 1){
+				for (int j = 0; j < sizeof(*filename); j = j + 2){
 				//acceses that filename for that location
 					buffer = readWord(addresstemp, myfile);
 					name[j] = buffer[0];
 					name[j + 1] = buffer[1];
+					delete(buffer);
 				}
 				//Found location, importing into main memmory
 				if (name == filename){
@@ -173,37 +181,58 @@ void CSC322_fopen(const char *filename, const char *mode, fstream& myfile, vecto
 				    //importing new file
 					ramStorage[index].newfile = false;
 					//importing edited
-					ramStorage[index].edited = false;
+					if (testm == "rb") {
+						ramStorage[index].edited = false;
+					}
+					else{
+						ramStorage[index].edited = true;
+					}
 					//importing filename
 					ramStorage[index].filename = string (name);
-
 					//importing filedata
 					addresstemp = addresstemp + 58;
 					buffer = readWord(addresstemp, myfile);
-					length = stoi(buffer, nullptr, 16);
+					stringstream ss;
+					math = (unsigned char*)buffer;
+					for (int i = 0; i < 2; ++i) {
+						ss << hex << (int)math[i];
+					}
+					string mystr = ss.str();
+					length = unsigned int(stoul(mystr, 0, 16));
 					addresstemp = addresstemp + 8;
 
 					for (int k = 0; k < length; k = k + 2) {
 						buffer = readWord(addresstemp, myfile);
 						ramStorage[index].filedata.push_back(buffer);
 					}
-
+					delete(buffer);
+					delete(math);
 					//import return address
 					ramStorage[index].returnaddress = address;
 					//importing mode
-					ramStorage[index].mode = mode;
+					ramStorage[index].mode = testm;
 					//determing based on mode what to do with the recently opened file
+					delete(name);
 				}
 				//moves to the next file location
-				else{
+				else {
+					delete(name);
 					addresstemp = addresstemp + 33;
 					next = readWord(addresstemp, myfile);
-					addresstemp = stoi(next, nullptr, 16);
+					stringstream ss;
+					math = (unsigned char*)next;
+					for (int i = 0; i < 2; ++i) {
+						ss << hex << (int)math[i];
+					}
+					string mystr = ss.str();
+					addresstemp = unsigned int(stoul(mystr,0,16));
+					delete(next);
+					delete(math);
 					if (addresstemp == 65535) {
 						int choice;
-						cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no";
+						cout << "File does not exist, would you like to create it? \n" << "1.yes  2.no"<<endl;
 						cin >> choice;
-						if (choice = 1) {
+						if (choice == 1) {
 
 							//For this portions we need to make sure we make the address after this header file location because 
 							//a file exists at this header, but a file doesnt exist afterwards.
@@ -216,9 +245,8 @@ void CSC322_fopen(const char *filename, const char *mode, fstream& myfile, vecto
 							ramStorage[index].mode = mode;
 
 						}
-
-
 					}
+					delete(header);
 				}
 			}
 		}
@@ -253,7 +281,8 @@ bool select(bool exit, fstream& myfile, vector<openfile>& ramStorage) {
 		writeWord(0, test, myfile);
 		char* filename = new char[2];
 		filename = readWord(0, myfile);
-		filename = readWord(1, myfile);
+		cout << filename[0] << filename[1];
+		//filename = readWord(1, myfile);
 		char* mode = new char[1];
 		mode;
 		
