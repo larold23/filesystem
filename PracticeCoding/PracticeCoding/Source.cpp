@@ -1,3 +1,12 @@
+/*Group
+Larry Myers
+Abdulrahman Alzubaidy
+Jason Utesch
+Jon Hagwood
+Kysa Robinson
+Suhail Alrehaili
+*/
+
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
